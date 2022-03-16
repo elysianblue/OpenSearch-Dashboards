@@ -59,6 +59,7 @@ interface IndexPatternDeps {
 interface SavedObjectBody {
   title?: string;
   timeFieldName?: string;
+  dfirstatus?: string;   // TARDIS Modification
   intervalName?: string;
   fields?: string;
   sourceFilters?: string;
@@ -76,6 +77,7 @@ export class IndexPattern implements IIndexPattern {
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
   public timeFieldName: string | undefined;
+  public dfirstatus: string | undefined;   // TARDIS Modification
   public intervalName: string | undefined;
   public type: string | undefined;
   public formatHit: {
@@ -121,6 +123,7 @@ export class IndexPattern implements IIndexPattern {
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
+    this.dfirstatus = spec.dfirstatus;  // TARDIS Modification
     this.sourceFilters = spec.sourceFilters;
 
     this.fields.replaceAll(Object.values(spec.fields || {}));
@@ -220,6 +223,7 @@ export class IndexPattern implements IIndexPattern {
 
       title: this.title,
       timeFieldName: this.timeFieldName,
+      dfirstatus: this.dfirstatus,  // TARDIS Modification
       sourceFilters: this.sourceFilters,
       fields: this.fields.toSpec({ getFormatterForField: this.getFormatterForField.bind(this) }),
       typeMeta: this.typeMeta,
@@ -322,6 +326,13 @@ export class IndexPattern implements IIndexPattern {
     return this.fields.getByName(this.timeFieldName);
   }
 
+  // TARDIS Modification
+  // Function to return dfirstatus field as part of indexPattern
+  getStatusField() {
+    if (!this.dfirstatus || !this.fields || !this.fields.getByName) return undefined;
+    return this.fields.getByName(this.dfirstatus);
+  }
+
   getFieldByName(name: string): IndexPatternField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
@@ -350,6 +361,7 @@ export class IndexPattern implements IIndexPattern {
     return {
       title: this.title,
       timeFieldName: this.timeFieldName,
+      dfirstatus: this.dfirstatus,   // TARDIS Modification
       intervalName: this.intervalName,
       sourceFilters: this.sourceFilters ? JSON.stringify(this.sourceFilters) : undefined,
       fields: this.fields ? JSON.stringify(this.fields) : undefined,

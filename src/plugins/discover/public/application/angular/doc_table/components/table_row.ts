@@ -46,6 +46,9 @@ import truncateByHeightTemplateHtml from '../components/table_row/truncate_by_he
 import { opensearchFilters } from '../../../../../../data/public';
 import { getServices } from '../../../../opensearch_dashboards_services';
 
+// TARDIS Modification
+import { send } from '../../../../../../console/public'
+
 const TAGS_WITH_WS = />\s+</g;
 
 /**
@@ -153,12 +156,17 @@ export function createTableRowDirective($compile: ng.ICompileService) {
       function createSummaryRow(row: any) {
         const indexPattern = $scope.indexPattern;
         $scope.flattenedRow = indexPattern.flattenHit(row);
+        
+        // TARDIS Modification
+        indexPattern.dfirstatus = true;
 
         // We just create a string here because its faster.
         const newHtmls = [openRowHtml];
 
         const mapping = indexPattern.fields.getByName;
         const hideTimeColumn = getServices().uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING, false);
+        // TARDIS Modification
+
         if (indexPattern.timeFieldName && !hideTimeColumn) {
           newHtmls.push(
             cellTemplate({
@@ -170,12 +178,53 @@ export function createTableRowDirective($compile: ng.ICompileService) {
           );
         }
 
+        // TARDIS Modification
+        // Set $scope.dfirstatus based on the value of the 'dfir_status' field in the returned record
+        // This is used to set the button color to indicate marked records. - JWR
+        if ($scope.flattenedRow['dfir_status'] == 'malicious') {
+          $scope.dfirstatus = true;
+        } else if ($scope.flattenedRow['dfir_status'] == 'unknown') {
+          $scope.dfirstatus = false;
+        }
+        // TARDIS Modification
+        // Set toggleStatus() method to execute update_by_query ES query when button is clicked by user
+        // This modifies the 'dfir_status' field in the record to mark the record as attacker activity.
+        $scope.toggleStatus = function toggleStatus() {
+          const method = "POST";
+          const path = $scope.row._index + "/_update_by_query";
+          const data =  "{\n" +
+                        "  \"script\": {\n" +
+                        "    \"inline\": \"if (ctx._source.dfir_status == \\\"malicious\\\"){ctx._source.dfir_status = \\\"unknown\\\"} else {ctx._source.dfir_status = \\\"malicious\\\"}\"," +
+                        "    \"lang\": \"painless\"\n" +
+                        "  },\n" +
+                        "  \"query\": {\n" +
+                        "    \"match\": {\n" +
+                        "      \"_id\": \"" + $scope.row._id + "\"\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}\n";
+          return send(method,path,data);
+        }
+        // TARDIS Modifcation
+        // Push the Status button to the row for rendering to the user
+        newHtmls.push(cellTemplate({
+          dfirstatus: true,
+          timefield: false,
+          sourcefield: true,
+          formatted: '<button class="kuiButton" ng-click="$parent.dfirstatus = !$parent.dfirstatus" ng-class="{  \'kuiButton--danger\': $parent.dfirstatus, \'kuiButton--basic\': !$parent.dfirstatus }"><span class="kuiButton__icon kuiIcon fa-plus"></span></button>',
+          filterable: false,
+          column: 'dfir_status'
+        }));
+        
+
         $scope.columns.forEach(function (column: any) {
           const isFilterable = mapping(column) && mapping(column).filterable && $scope.filter;
-
+          // TARDIS Modification
+          // Add dfirstatus from $scope to 'false' to display after timestamp
           newHtmls.push(
             cellTemplate({
               timefield: false,
+              dfirstatus:false,
               sourcefield: column === '_source',
               formatted: _displayField(row, column, true),
               filterable: isFilterable,

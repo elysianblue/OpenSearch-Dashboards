@@ -350,6 +350,7 @@ export class IndexPatternsService {
       attributes: {
         title,
         timeFieldName,
+        dfirstatus,  // TARDIS Modification
         intervalName,
         fields,
         sourceFilters,
@@ -371,6 +372,7 @@ export class IndexPatternsService {
       title,
       intervalName,
       timeFieldName,
+      dfirstatus,  // TARDIS Modification
       sourceFilters: parsedSourceFilters,
       fields: this.fieldArrayToMap(parsedFields),
       typeMeta: parsedTypeMeta,

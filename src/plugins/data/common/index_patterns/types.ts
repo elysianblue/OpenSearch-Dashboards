@@ -45,8 +45,10 @@ export interface IIndexPattern {
   id?: string;
   type?: string;
   timeFieldName?: string;
+  dfirstatus?: string;    // TARDIS Modification
   intervalName?: string | null;
   getTimeField?(): IFieldType | undefined;
+  getStatusField?(): IFieldType | undefined;   // TARDIS Modification
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   getFormatterForField?: (
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
@@ -59,6 +61,7 @@ export interface IndexPatternAttributes {
   title: string;
   typeMeta: string;
   timeFieldName?: string;
+  dfirstatus?: string;   // TARDIS Modification
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
@@ -192,6 +195,7 @@ export interface IndexPatternSpec {
   title?: string;
   intervalName?: string;
   timeFieldName?: string;
+  dfirstatus?: string;  // TARDIS Modification
   sourceFilters?: SourceFilter[];
   fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;

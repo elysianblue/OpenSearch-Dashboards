@@ -59,6 +59,24 @@ export function getTimeColumn(timeFieldName: string): ColumnProps {
   };
 }
 /**
+ * TARDIS Modification
+ * Returns properties necessary to display the selectable status column
+ * If it's an IndexPattern with dfirstatus, the status button is prepended,
+ * nor moveable and removable
+ * @param dfirstatus Record status of 'malicious' (red) or 'unknown' (white)
+ * @returns ColumnProps object
+ */
+ export function getStatusColumn(dfirstatus: string): ColumnProps {
+  return {
+    name: dfirstatus,
+    displayName: 'Status',
+    isSortable: true,
+    isRemoveable: false,
+    colLeftIdx: -1,
+    colRightIdx: -1,
+  };
+}
+/**
  * A given array of column names returns an array of properties
  * necessary to display the columns. If the given indexPattern
  * has a timefield, a time column is prepended
@@ -87,7 +105,9 @@ export function getDisplayedColumns(
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };
   });
-  return !hideTimeField && indexPattern.timeFieldName
-    ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
+  // TARDIS Modification
+  // Added getStatusColumn to return the Status column for rendering
+  return !hideTimeField && indexPattern.timeFieldName && indexPattern.dfirstatus
+    ? [getTimeColumn(indexPattern.timeFieldName), getStatusColumn(indexPattern.dfirstatus), ...columnProps]
     : columnProps;
 }
